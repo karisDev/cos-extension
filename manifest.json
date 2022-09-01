@@ -1,0 +1,14 @@
+{
+  "name": "Cambridge One Solver",
+  "description": "Cambridge solver extension",
+  "version": "1.0",
+  "manifest_version": 2,
+  "permissions": ["webRequest", "https://www.cambridgeone.org/*", "*://content.cambridgeone.org/*"],
+  "content_scripts": [
+      {
+          "matches": ["https://www.cambridgeone.org/*"],
+          "js": ["main.js"],
+          "css": ["window.css"]
+      }
+  ]
+}
