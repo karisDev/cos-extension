@@ -14,8 +14,8 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.cambridgeone.org/*"],
-      "js": ["content.js", "parser.js"]
+      "matches": ["*://www.cambridgeone.org/*"],
+      "js": ["content.js", "parser.js", "automation.js"]
     }
   ]
 }

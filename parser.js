@@ -18,15 +18,15 @@ const taskTypes = {
   "Present:Present:Present": null, // Информация без задания или запись голоса
   "Order:Sort:Sorting": null, // Перетаскивание элементов, но особенное
 };
-function parseAnswers(quizData) {
+function parseQuiz(quizData) {
   // сортируем задания по cat id как указано в файле LearningObjectInfo.xml
   const regex = /cat(.*?).xml/g;
   const tasksOrder = quizData["LearningObjectInfo.xml"].match(regex);
   delete quizData["LearningObjectInfo.xml"];
 
   // проходим по каждому заданию парсером
+  const xmlParser = new DOMParser();
   const tasks = tasksOrder.map((taskID) => {
-    const xmlParser = new DOMParser();
     const taskXML = xmlParser.parseFromString(
       quizData[taskID].replaceLooseChars(),
       "text/xml"
@@ -66,7 +66,6 @@ function parseAnswers(quizData) {
           );
         return fieldAnswer.childNodes[0].nodeValue;
       });
-      console.log(answers);
       return answers;
     });
 

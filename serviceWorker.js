@@ -1,3 +1,4 @@
+console.log("cos service worker is silently working");
 chrome.webRequest.onBeforeRequest.addListener(
   function (details) {
     if (details.tabId !== -1) {
@@ -12,10 +13,18 @@ chrome.webRequest.onBeforeRequest.addListener(
               chrome.tabs.sendMessage(
                 tabs[0].id,
                 {
-                  toDo: "onQuizDataLoaded",
+                  event: "onQuizDataLoaded",
                   data: data,
                 },
-                function (response) {}
+                function (response) {
+                  if (chrome.runtime.lastError) {
+                    setTimeout(tabs[0].id, 1000);
+                  } else {
+                    console.log(
+                      "cos service worker successfully catched data.js"
+                    );
+                  }
+                }
               );
             }
           );
