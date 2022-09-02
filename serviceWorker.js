@@ -1,6 +1,5 @@
 chrome.webRequest.onBeforeRequest.addListener(
   function (details) {
-    console.log("request came in");
     if (details.tabId !== -1) {
       fetch(details.url)
         .then(function (response) {
@@ -10,7 +9,6 @@ chrome.webRequest.onBeforeRequest.addListener(
           chrome.tabs.query(
             { active: true, currentWindow: true },
             function (tabs) {
-              console.log(tabs);
               chrome.tabs.sendMessage(
                 tabs[0].id,
                 {
