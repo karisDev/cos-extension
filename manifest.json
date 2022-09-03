@@ -8,6 +8,13 @@
   "background": {
     "service_worker": "serviceWorker.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["cos_style.css"],
+      "matches": ["*://www.cambridgeone.org/*"],
+      "use_dynamic_url": true
+    }
+  ],
   "action": {
     "default_title": "Cambridge One Solver",
     "default_popup": "popup.html"

@@ -1,3 +1,4 @@
+//https://www.cambridgeone.org/learning-path/learner/org_nust-misis-prod1/product/evpel6/class/7340bf0b-ff93-4060-92b6-cac50e7102c0/item/1569210933017%2F1569221554486%2F1569221630598
 String.prototype.replaceLooseChars = function () {
   return this.replace(/&amp|&ampamp/g, "&amp;amp;")
     .replace(/&lt/g, "&lt;")
@@ -47,15 +48,19 @@ function parseQuiz(quizData) {
     // пробегаемся по каждому полю ответов
     const answers = responseDeclaration.toArray().map((currentField, i) => {
       if (taskIdentifier == "Input:Completion:Text gap") {
-        const correctAnswersID =
-          currentField.childNodes[0].childNodes.toArray()[0].innerHTML;
-        console.log(correctAnswersID);
-        return correctAnswersID;
+        const correctAnswerID =
+          currentField.childNodes[0].childNodes[0].innerHTML;
+        return correctAnswerID;
       }
       // получаем ID правильных ответов для поля
-      const correctAnswersID = currentField.childNodes[0].childNodes
-        .toArray()
-        .map((value) => value.innerHTML.split(" ")[0]);
+      const correctAnswersID = [
+        ...new Set(
+          currentField.childNodes[0].childNodes
+            .toArray()
+            .map((value) => value.innerHTML.split(" ")[0])
+        ),
+      ];
+
       // проходим по всем ID вариантов и находим в них правильный
       const answers = correctAnswersID.map((answerID) => {
         const fieldAnswer = interactionsCollection[i].childNodes
@@ -66,6 +71,11 @@ function parseQuiz(quizData) {
           );
         return fieldAnswer.childNodes[0].nodeValue;
       });
+
+      if (taskIdentifier == "Order:Match:Text gap") {
+        return [...new Set(answers)];
+      }
+
       return answers;
     });
 
