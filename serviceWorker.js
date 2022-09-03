@@ -1,3 +1,4 @@
+// данный service worker необходим потому что на странице действует cors, который закрыл доступ к файлу data.js
 chrome.webRequest.onCompleted.addListener(
   function (details) {
     if (!details.initiator.includes("cambridgeone.org")) {

@@ -1,6 +1,9 @@
 .cos_container {
-  background: f2f2f1;
   width: 100%;
   padding: 10px 15px;
   box-sizing: border-box;
+}
+.cos_container h1 {
+  font-size: 24px;
+  user-select: initial;
 }
