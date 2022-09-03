@@ -3,12 +3,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     const quizData = JSON.parse(request.data.replace(/ajaxData = |;/g, ""));
     handleData(quizData);
   }
-  sendResponse({ success: true });
+  sendResponse({ received: true });
 });
 
 function handleData(quizData) {
   const instructions = parseQuiz(quizData);
-  console.log(instructions);
   createUI(instructions);
 }
 
@@ -38,9 +37,15 @@ function createUI(instructions) {
 
     waitForSections(sections, () => {
       instructions.map((instruction, index) => {
-        const h1 = document.createElement("h1");
-        h1.innerHTML = instruction.answers.join(", ");
-        sections[index].appendChild(h1);
+        console.log("adding", instruction);
+        sections[index].insertAdjacentHTML(
+          "beforeend",
+          `
+          <div style="width:100%; height:100%; background-color:#00000050">
+          <h1>${instruction.answers.join(", ")}</h1>
+          </div>
+          `
+        );
       });
     });
   });

@@ -47,9 +47,9 @@ function parseQuiz(quizData) {
     // пробегаемся по каждому полю ответов
     const answers = responseDeclaration.toArray().map((currentField, i) => {
       if (taskIdentifier == "Input:Completion:Text gap") {
-        const correctAnswersID = currentField.childNodes[0].childNodes
-          .toArray()
-          .map((value) => value.innerHTML);
+        const correctAnswersID =
+          currentField.childNodes[0].childNodes.toArray()[0].innerHTML;
+        console.log(correctAnswersID);
         return correctAnswersID;
       }
       // получаем ID правильных ответов для поля
