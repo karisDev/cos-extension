@@ -1,3 +1,5 @@
+chrome.runtime.sendMessage({ toDo: "wakeUpWorker" }, (response) => {});
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.event == "onQuizDataLoaded") {
     const quizData = JSON.parse(request.data.replace(/ajaxData = |;/g, ""));
@@ -8,7 +10,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 function handleData(quizData) {
   const instructions = parseQuiz(quizData);
-  createUIandSolve(instructions);
+  createUiAndCallSolve(instructions);
 }
 
 function waitForElement(selector, callback) {
@@ -27,7 +29,7 @@ function waitForSections(sections, callback) {
   }
 }
 
-function createUIandSolve(instructions) {
+function createUiAndCallSolve(instructions) {
   waitForElement("#content-course-ext", () => {
     const iframe = document
       .getElementById("content-course-ext")
@@ -56,28 +58,46 @@ function createUIandSolve(instructions) {
             `
           );
         } catch {
-          console.log("it was unsuccessful (-_-). i hope its just :Present:");
-          console.log(sections, index);
+          console.log(
+            "it was unsuccessful (-_-). pray its just :Present:",
+            sections,
+            index
+          );
         }
       });
 
-      // done with ui
+      // done with ui and loaded all sections
       solveTest(instructions);
     });
   });
 }
 
-const findElementByXpath = (path) => {
+const findElementByXpath = (xpath, parent = document) => {
   return document.evaluate(
-    path,
-    document,
+    xpath,
+    parent,
     null,
     XPathResult.FIRST_ORDERED_NODE_TYPE,
     null
   ).singleNodeValue;
 };
 
-const navigateNextTask = () => {
+const findElementsByXpath = (xpath, parent = document) => {
+  let results = [];
+  let query = document.evaluate(
+    xpath,
+    parent,
+    null,
+    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+    null
+  );
+  for (let i = 0, length = query.snapshotLength; i < length; ++i) {
+    results.push(query.snapshotItem(i));
+  }
+  return results;
+};
+
+const switchTask = () => {
   const checkBtn = findElementByXpath('//a[text()="Check"]');
   if (checkBtn) {
     checkBtn.click();
@@ -88,21 +108,50 @@ const navigateNextTask = () => {
   }
 };
 
-const textEntrySolver = (answers, iframe) => {
-  const inputs = iframe.getElementsByTagName("input");
+const textEntrySolver = (answers, parent) => {
+  const inputs = parent.getElementsByTagName("input");
   answers.map((answer, index) => {
     inputs[index].value = answer;
     inputs[index].dispatchEvent(new Event("change"));
   });
 };
-const choiceSolver = (answers, iframe) => {
-  const xpath = `//span[@text()=${answers[0]}]`;
-  console.log(findIframeElementByXpath(xpath, iframe));
-  // findIframeElementByXpath(xpath, iframe).click();
+
+const choiceSolver = (answers, parent) => {
+  answers.forEach((answer) => {
+    const xpath = `//span[text()="${answer}"]`;
+    console.log(findElementsByXpath(xpath, parent));
+    findElementsByXpath(xpath, parent).forEach((el) => el.click());
+  });
 };
-const inlineChoiceSolver = (answers, iframe) => {};
+
+const gapSolver = (answers, parent) => {
+  answers.forEach((answer) => {
+    const xpath = `//div[@class="content" and text()[contains(.,"${answer[0].slice(
+      1
+    )}")]]`;
+    const matches = findElementsByXpath(xpath, parent);
+    matches.forEach((match) => {
+      match.click();
+    });
+  });
+};
+
+const inlineChoiceSolver = (answers, parent) => {
+  const dropdownXpath = `//div[@class="rich-dropdown"]`;
+  const dropdowns = findElementsByXpath(dropdownXpath, parent);
+  for (let i = 0; i < dropdowns.length; i++) {
+    dropdowns[i].click();
+    const correctElementXpath = `//li[text()="${answers[i]}"]`;
+    const correctElement = findElementByXpath(
+      correctElementXpath,
+      dropdowns[i]
+    );
+    correctElement.click();
+  }
+};
 
 async function solveTest(instructions) {
+  console.log(instructions);
   const startUrl = document.location.href;
   const iframe = document
     .getElementById("content-course-ext")
@@ -112,7 +161,9 @@ async function solveTest(instructions) {
   do {
     try {
       // await new Promise((r) => setTimeout(r, 10));
-      await new Promise((r) => setTimeout(r, 5000));
+      await new Promise((r) => setTimeout(r, 50));
+      switchTask();
+      await new Promise((r) => setTimeout(r, 50));
       const currentSection = Array.prototype.slice
         .call(sections)
         .findIndex((section) =>
@@ -123,28 +174,25 @@ async function solveTest(instructions) {
       switch (instructions[currentSection].taskType) {
         case "Input:Completion:Text gap": // textEntryInteraction
           textEntrySolver(answers, sectionIframe);
-          navigateNextTask();
           break;
         case "Identify:Select:Radiobutton": // choiceInteraction
           choiceSolver(answers, sectionIframe);
           break;
         case "Identify:Select:Checkbox": // choiceInteraction
           choiceSolver(answers, sectionIframe);
+          return;
           break;
         case "Identify:Select:Dropdown": // inlineChoiceInteraction
           inlineChoiceSolver(answers, sectionIframe);
           break;
-        case "Order:Match:Text gap": // gapMatchInteraction
-          textEntrySolver(
-            instructions[currentSection].answers,
-            sections[currentSection]
-          );
-          submitBtn.click();
+        case "Order:Match:Text gap": // gapMatchInteraction  mh
+          gapSolver(answers, sectionIframe);
           break;
         case "Present:Present:Present": // present
-          navigateNextTask();
           break;
         case "Order:Sort:Sorting": // todo
+          gapSolver(answers, sectionIframe);
+          return;
           break;
         default:
           break;
@@ -152,7 +200,7 @@ async function solveTest(instructions) {
       if (
         sections[currentSection].getAttribute("class").includes("end-result")
       ) {
-        console.log("done");
+        console.log("cos done solving");
         return;
       }
     } catch (e) {

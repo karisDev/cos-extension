@@ -3,8 +3,9 @@
   "description": "Cambridge solver extension",
   "version": "0.1.0",
   "manifest_version": 3,
-  "permissions": ["webRequest"],
+  "permissions": ["webRequest", "webNavigation"],
   "host_permissions": ["*://*.cambridgeone.org/*"],
+  "optional_host_permissions": ["*://*/*"],
   "background": {
     "service_worker": "serviceWorker.js"
   },
@@ -22,7 +23,7 @@
   "content_scripts": [
     {
       "matches": ["*://www.cambridgeone.org/*"],
-      "js": ["content.js", "parser.js", "automation.js"]
+      "js": ["content.js", "parser.js"]
     }
   ]
 }

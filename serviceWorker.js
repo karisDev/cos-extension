@@ -1,4 +1,10 @@
-// данный service worker необходим потому что на странице действует cors, который закрыл доступ к файлу data.js
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.toDo === "wakeUpWorker") {
+    sendResponse("worker is awake");
+  }
+});
+
+// данный service worker необходим потому что на кэмбридже действует cors, который закрыл доступ к файлу data.js
 chrome.webRequest.onCompleted.addListener(
   function (details) {
     if (!details.initiator.includes("cambridgeone.org")) {
@@ -22,7 +28,7 @@ chrome.webRequest.onCompleted.addListener(
         } catch {}
       });
   },
-  { urls: ["*://content.cambridgeone.org/*/data.js"] },
+  { urls: ["https://content.cambridgeone.org/*/data.js"] },
   ["extraHeaders"]
 );
 

@@ -1,4 +1,3 @@
-//https://www.cambridgeone.org/learning-path/learner/org_nust-misis-prod1/product/evpel6/class/7340bf0b-ff93-4060-92b6-cac50e7102c0/item/1569210933017%2F1569221554486%2F1569221630598
 String.prototype.replaceLooseChars = function () {
   return this.replace(/&amp|&ampamp/g, "&amp;amp;")
     .replace(/&lt/g, "&lt;")
@@ -17,7 +16,7 @@ const taskTypes = {
   "Identify:Select:Dropdown": "inlineChoiceInteraction", // Комбобокс
   "Order:Match:Text gap": "gapMatchInteraction", // Перетаскивание элементов
   "Present:Present:Present": null, // Информация без задания или запись голоса
-  "Order:Sort:Sorting": null, // Перетаскивание элементов, но особенное
+  "Order:Sort:Sorting": "gapMatchInteraction", // Перетаскивание элементов, но особенное
 };
 function parseQuiz(quizData) {
   // сортируем задания по cat id как указано в файле LearningObjectInfo.xml
